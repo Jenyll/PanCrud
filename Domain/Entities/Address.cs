@@ -1,21 +1,15 @@
 using Domain.ValueObjects;
 
 namespace Domain.Entities;
-
-public class Address
-{
+public class Address{
     public Guid Id { get; private set; } = Guid.NewGuid();
-
     public Cep Cep { get; private set; }
-
     public string Street { get; private set; } = string.Empty;
     public string Number { get; private set; } = string.Empty;
     public string? Complement { get; private set; }
     public string Neighborhood { get; private set; } = string.Empty;
     public string City { get; private set; } = string.Empty;
     public string State { get; private set; } = string.Empty;
-
-    // For EF Core
     private Address() { }
 
     public Address(

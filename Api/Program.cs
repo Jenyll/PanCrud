@@ -23,7 +23,7 @@ builder.Services.AddScoped<IAddressRepository, AddressRepository>();
 
 builder.Services.AddHttpClient<IViaCepClient, ViaCepClient>(client =>
 {
-    client.BaseAddress = new Uri("https://viacep.com.br/");
+    client.BaseAddress = new Uri("https://viacep.com.br/");     
     client.Timeout = TimeSpan.FromSeconds(10);
 });
 

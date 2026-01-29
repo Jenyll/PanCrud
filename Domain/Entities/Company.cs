@@ -25,6 +25,11 @@ public sealed class Company : Person
         Validate();
     }
 
+    public void UpdateCnpj(Cnpj cnpj)
+    {
+        Cnpj = cnpj;
+    }
+
     private void Validate()
     {
         if (string.IsNullOrWhiteSpace(LegalName))

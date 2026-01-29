@@ -1,5 +1,8 @@
 ﻿using Application.Dtos.Addresses;
+using Application.Dtos.Addresses.Request;
+using Application.Dtos.Addresses.Response;
 using Application.Dtos.ViaCep;
+using Application.Ports;
 using Application.UseCases.Addresses.Interfaces;
 using Domain.Entities;
 using Domain.ValueObjects;

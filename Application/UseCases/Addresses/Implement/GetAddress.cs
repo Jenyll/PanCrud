@@ -1,4 +1,6 @@
 ﻿using Application.Dtos.Addresses;
+using Application.Dtos.Addresses.Response;
+using Application.Ports;
 using Application.UseCases.Addresses.Interfaces;
 
 namespace Application.UseCases.Addresses.Implement
@@ -15,3 +17,4 @@ namespace Application.UseCases.Addresses.Implement
             return address is null ? null : AddressMapper.ToResponse(address);
         }
     }
+}

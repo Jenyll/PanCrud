@@ -1,4 +1,5 @@
-﻿using Domain.Entities;
+﻿using Application.Dtos.Addresses.Response;
+using Domain.Entities;
 
 namespace Application.Dtos.Addresses
 {

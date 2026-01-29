@@ -51,11 +51,16 @@ public class Address
     private void Validate()
     {
         if (string.IsNullOrWhiteSpace(State) || State.Length != 2)
-            throw new ArgumentException("State must be a 2-letter UF code (e.g., 'SP').", nameof(State));
+            throw new ArgumentException("UF deve ter 2 letras (ex: SP, CE).", nameof(State));
     }
     public void UpdateCepAndFromViaCep(Cep cep, string street, string neighborhood, string city, string state)
     {
         Cep = cep;
         UpdateFromViaCep(street, neighborhood, city, state);
+    }
+    public void UpdateNumberAndComplement(string number, string? complement)
+    {
+        Number = number?.Trim() ?? throw new ArgumentNullException(nameof(number), "Número é obrigatório.");
+        Complement = string.IsNullOrWhiteSpace(complement) ? null : complement.Trim();
     }
 }

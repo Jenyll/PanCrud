@@ -1,5 +1,8 @@
 ﻿using Application.Dtos.Addresses;
+using Application.Dtos.Addresses.Request;
+using Application.Dtos.Addresses.Response;
 using Application.Dtos.ViaCep;
+using Application.Ports;
 using Application.UseCases.Addresses.Interfaces;
 using Domain.ValueObjects;
 
@@ -20,8 +23,7 @@ namespace Application.UseCases.Addresses.Implement
         {
             var address = await _repo.GetByIdAsync(id, ct);
             if (address is null) return null;
-
-            // Atualiza número/complemento se vier
+           
             if (!string.IsNullOrWhiteSpace(request.Number) || request.Complement is not null)
             {
                 var number = string.IsNullOrWhiteSpace(request.Number) ? address.Number : request.Number!;

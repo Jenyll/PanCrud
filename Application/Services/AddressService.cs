@@ -1,4 +1,6 @@
 using Application.Dtos.Addresses;
+using Application.Dtos.Addresses.Request;
+using Application.Dtos.Addresses.Response;
 using Application.UseCases.Addresses.Interfaces;
 
 namespace Application.Services;

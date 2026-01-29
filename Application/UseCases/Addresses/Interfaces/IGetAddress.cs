@@ -1,8 +1,8 @@
 ﻿using Application.Dtos.Addresses;
 
-namespace Application.UseCases.Addresses;
+namespace Application.UseCases.Addresses.Interfaces;
 
-public interface IGetAddressUseCase
+public interface IGetAddress
 {
     Task<AddressResponse?> ExecuteAsync(Guid id, CancellationToken ct);
 }

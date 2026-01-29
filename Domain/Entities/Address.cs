@@ -53,4 +53,9 @@ public class Address
         if (string.IsNullOrWhiteSpace(State) || State.Length != 2)
             throw new ArgumentException("State must be a 2-letter UF code (e.g., 'SP').", nameof(State));
     }
+    public void UpdateCepAndFromViaCep(Cep cep, string street, string neighborhood, string city, string state)
+    {
+        Cep = cep;
+        UpdateFromViaCep(street, neighborhood, city, state);
+    }
 }

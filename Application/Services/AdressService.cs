@@ -1,20 +1,20 @@
-﻿using Application.UseCases.Addresses;
-using Application.Dtos.Services;
+﻿using Application.Dtos.Addresses;
+using Application.UseCases.Addresses.Interfaces;
 
 namespace Application.Services
 {
     public class AdressService : IAddressService
     {
-        private readonly ICreateAddressUseCase _create;
-        private readonly IGetAddressUseCase _get;
-        private readonly IUpdateAddressUseCase _update;
-        private readonly IDeleteAddressUseCase _delete;
+        private readonly ICreateAddress _create;
+        private readonly IGetAddress _get;
+        private readonly IUpdateAddress _update;
+        private readonly IDeleteAddress _delete;
 
         public AddressService(
-            ICreateAddressUseCase create,
-            IGetAddressUseCase get,
-            IUpdateAddressUseCase update,
-            IDeleteAddressUseCase delete)
+            ICreateAddress create,
+            IGetAddress get,
+            IUpdateAddress update,
+            IDeleteAddress delete)
         {
             _create = create;
             _get = get;

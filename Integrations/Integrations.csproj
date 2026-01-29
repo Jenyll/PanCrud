@@ -10,5 +10,8 @@
     <Folder Include="Common\" />
     <Folder Include="ViaCep\Models\" />
   </ItemGroup>
+	<ItemGroup>
+		<ProjectReference Include="..\Application\Application.csproj" />
+	</ItemGroup>
 
 </Project>

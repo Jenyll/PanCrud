@@ -1,8 +1,9 @@
-﻿using Application.UseCases.Addresses.Interfaces;
+﻿using Application.Ports;
+using Application.UseCases.Addresses.Interfaces;
 
 namespace Application.UseCases.Addresses.Implement
 {
-    internal class DeleteAddress : IDeleteAddress
+    public sealed class DeleteAddress : IDeleteAddress
     {
         private readonly IAddressRepository _repo;
 

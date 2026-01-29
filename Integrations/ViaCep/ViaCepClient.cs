@@ -1,8 +1,9 @@
-﻿using System.Net.Http.Json;
+﻿using Application.Dtos.ViaCep;
+using System.Net.Http.Json;
 
 namespace Integrations.ViaCep
 {
-    internal class ViaCepClient : IViaCepClient
+    public sealed class ViaCepClient : IViaCepClient
     {
         private readonly HttpClient _http;
 

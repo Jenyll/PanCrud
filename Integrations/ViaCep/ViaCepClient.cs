@@ -28,7 +28,6 @@ namespace Integrations.ViaCep
             };
         }
 
-        // DTO interno do provider (mantém a sujeira aqui dentro)
         private sealed class ViaCepResponse
         {
             public string? cep { get; set; }

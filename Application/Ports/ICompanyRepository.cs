@@ -8,4 +8,5 @@ public interface ICompanyRepository
     Task<Company> CreateAsync(Company company, CancellationToken ct);
     Task UpdateAsync(Company company, CancellationToken ct);
     Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+    Task<Company?> GetByCnpjAsync(string cnpj, CancellationToken ct);
 }

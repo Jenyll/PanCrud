@@ -34,4 +34,8 @@ public class CompanyRepository : ICompanyRepository
         await _db.SaveChangesAsync(ct);
         return true;
     }
+    public Task<Company?> GetByCnpjAsync(string cnpj, CancellationToken ct)
+    => _db.Companies
+        .Include(c => c.Address)
+        .FirstOrDefaultAsync(x => x.Cnpj.Value == cnpj, ct);
 }

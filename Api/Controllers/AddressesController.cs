@@ -26,6 +26,19 @@ namespace Api.Controllers
 
             return Ok(result);
         }
+        [HttpGet("cep/{cep}")]
+        public async Task<ActionResult<AddressLookupResponse>> GetByCep([FromRoute] string cep, CancellationToken ct)
+        {
+            if (string.IsNullOrWhiteSpace(cep))
+                return BadRequest(new { message = "CEP é obrigatório." });
+
+            var result = await _service.LookupByCepAsync(cep, ct);
+
+            if (result is null)
+                return NotFound(new { message = "CEP não encontrado." });
+
+            return Ok(result);
+        }
 
         [HttpPost]
         public async Task<ActionResult<AddressResponse>> Create([FromBody] CreateAddressRequest request, CancellationToken ct)

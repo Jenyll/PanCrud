@@ -34,4 +34,8 @@ public class IndividualRepository : IIndividualRepository
         await _db.SaveChangesAsync(ct);
         return true;
     }
+    public Task<Individual?> GetByCpfAsync(string cpf, CancellationToken ct)
+    => _db.Individuals
+        .Include(i => i.Address)
+        .FirstOrDefaultAsync(x => x.Cpf.Value == cpf, ct);
 }

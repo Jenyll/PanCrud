@@ -135,4 +135,26 @@ public sealed class PersonService : IPersonService
 
         return created.Id;
     }
+    public async Task<PersonResponse?> GetByDocumentAsync(string number, PersonType type, CancellationToken ct)
+    {
+        var digits = new string(number.Where(char.IsDigit).ToArray());
+        if (string.IsNullOrWhiteSpace(digits))
+            throw new ArgumentException("Número do documento inválido.");
+
+        if (type == PersonType.Individual)
+        {
+            var cpf = Domain.ValueObjects.Cpf.From(digits); // valida e normaliza
+            var individual = await _individualRepo.GetByCpfAsync(cpf.Value, ct);
+            return individual is null ? null : PersonMapper.FromIndividual(individual);
+        }
+
+        if (type == PersonType.Company)
+        {
+            var cnpj = Domain.ValueObjects.Cnpj.From(digits);
+            var company = await _companyRepo.GetByCnpjAsync(cnpj.Value, ct);
+            return company is null ? null : PersonMapper.FromCompany(company);
+        }
+
+        throw new ArgumentException("Tipo de pessoa inválido.");
+    }
 }

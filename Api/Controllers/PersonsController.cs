@@ -1,3 +1,4 @@
+using Application.Dtos.Persons;
 using Application.Dtos.Persons.Request;
 using Application.Dtos.Persons.Response;
 using Application.Services;
@@ -21,13 +22,31 @@ public class PersonsController : Controller
         return Ok(result);
     }
 
+    [HttpGet("document")]
+    public async Task<ActionResult<PersonResponse>> GetByDocument(
+    [FromQuery] string number,
+    [FromQuery] PersonType type, // 0 PF, 1 PJ (ou Individual/Company)
+    CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(number))
+            return BadRequest(new { message = "number é obrigatório." });
+
+        var result = await _service.GetByDocumentAsync(number, type, ct);
+
+        if (result is null)
+            return NotFound(new { message = "Pessoa não encontrada." });
+
+        return Ok(result);
+    }
+
+
     [HttpPost]
     public async Task<ActionResult<PersonResponse>> Create([FromBody] CreatePersonRequest request, CancellationToken ct)
     {
         try
         {
             var created = await _service.CreateAsync(request, ct);
-            return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+            return CreatedAtAction(nameof(GetByDocument), new { number = request.Type == PersonType.Individual ? request.Cpf : request.Cnpj, type = request.Type }, created);
         }
         catch (ArgumentException ex) { return BadRequest(new { message = ex.Message }); }
         catch (InvalidOperationException ex) { return UnprocessableEntity(new { message = ex.Message }); }

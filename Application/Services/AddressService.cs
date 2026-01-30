@@ -1,7 +1,8 @@
+using Application.Dtos.Addresses;
 using Application.Dtos.Addresses.Request;
 using Application.Dtos.Addresses.Response;
-using Application.UseCases.Addresses.Interfaces;
 using Application.Ports;
+using Application.UseCases.Addresses.Interfaces;
 using Domain.Entities;
 using Domain.ValueObjects;
 
@@ -64,5 +65,26 @@ public sealed class AddressService : IAddressService
             throw new InvalidOperationException("Endereço criado mas não encontrado no repositório.");
 
         return createdEntity;
+    }
+    public async Task<AddressResponse?> GetByCepAsync(string cep, CancellationToken ct)
+    {
+        var value = Cep.From(cep).Value;
+        var entity = await _repo.GetByCepAsync(value, ct);
+        return entity is null ? null : AddressMapper.ToResponse(entity);
+    }
+    public async Task<AddressLookupResponse?> LookupByCepAsync(string cep, CancellationToken ct)
+    {
+        var value = Cep.From(cep).Value;
+        var entity = await _repo.GetByCepAsync(value, ct);
+        if (entity is null) return null;
+
+        return new AddressLookupResponse
+        {
+            Cep = new string(cep.Where(char.IsDigit).ToArray()),
+            Street = entity.Street,
+            Neighborhood = entity.Neighborhood,
+            City = entity.City,
+            State = entity.State
+        };
     }
 }

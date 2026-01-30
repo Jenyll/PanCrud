@@ -24,7 +24,6 @@ namespace Application.UseCases.Addresses.Implement
         {
             if (request is null) throw new ArgumentException("Payload é obrigatório.");
             if (string.IsNullOrWhiteSpace(request.Cep)) throw new ArgumentException("CEP é obrigatório.");
-            if (string.IsNullOrWhiteSpace(request.Number)) throw new ArgumentException("Número é obrigatório.");
 
             var cep = Cep.From(request.Cep);
 
@@ -35,8 +34,6 @@ namespace Application.UseCases.Addresses.Implement
             var address = new Address(
                 cep: cep,
                 street: via.Street,
-                number: request.Number,
-                complement: request.Complement,
                 neighborhood: via.Neighborhood,
                 city: via.City,
                 state: via.State
@@ -45,5 +42,6 @@ namespace Application.UseCases.Addresses.Implement
             var created = await _repo.CreateAsync(address, ct);
             return AddressMapper.ToResponse(created);
         }
+
     }
 }

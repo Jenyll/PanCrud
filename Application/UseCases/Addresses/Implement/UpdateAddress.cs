@@ -6,47 +6,52 @@ using Application.Ports;
 using Application.UseCases.Addresses.Interfaces;
 using Domain.ValueObjects;
 
-namespace Application.UseCases.Addresses.Implement
+namespace Application.UseCases.Addresses.Implement;
+
+public sealed class UpdateAddress : IUpdateAddress
 {
-    public sealed class UpdateAddress : IUpdateAddress
+    private readonly IAddressRepository _repo;
+    private readonly IViaCepClient _viaCep;
+
+    public UpdateAddress(IAddressRepository repo, IViaCepClient viaCep)
     {
-        private readonly IAddressRepository _repo;
-        private readonly IViaCepClient _viaCep;
+        _repo = repo;
+        _viaCep = viaCep;
+    }
 
-        public UpdateAddress(IAddressRepository repo, IViaCepClient viaCep)
+    public async Task<AddressResponse?> ExecuteAsync(Guid id, UpdateAddressRequest request, CancellationToken ct)
+    {
+        if (request is null) throw new ArgumentException("Payload é obrigatório.");
+
+        var address = await _repo.GetByIdAsync(id, ct);
+        if (address is null) return null;
+
+        // Se vier CEP (mesmo ou novo), consulta ViaCEP e atualiza logradouro/bairro/cidade/UF.
+        if (!string.IsNullOrWhiteSpace(request.Cep))
         {
-            _repo = repo;
-            _viaCep = viaCep;
+            var newCep = Cep.From(request.Cep);
+
+            // Se mudou o CEP, atualiza Cep + dados ViaCEP
+            if (newCep.Value != address.Cep.Value)
+            {
+                var via = await _viaCep.GetAsync(newCep.Value, ct);
+                if (via is null || via.Error)
+                    throw new InvalidOperationException("CEP não encontrado no ViaCEP.");
+
+                address.UpdateCepAndFromViaCep(newCep, via.Street, via.Neighborhood, via.City, via.State);
+            }
+            else
+            {
+                //Refresh mesmo CEP — manter "sempre atualizado"
+                var via = await _viaCep.GetAsync(newCep.Value, ct);
+                if (via is null || via.Error)
+                    throw new InvalidOperationException("CEP não encontrado no ViaCEP.");
+
+                address.UpdateFromViaCep(via.Street, via.Neighborhood, via.City, via.State);
+            }
         }
 
-        public async Task<AddressResponse?> ExecuteAsync(Guid id, UpdateAddressRequest request, CancellationToken ct)
-        {
-            var address = await _repo.GetByIdAsync(id, ct);
-            if (address is null) return null;
-           
-            if (!string.IsNullOrWhiteSpace(request.Number) || request.Complement is not null)
-            {
-                var number = string.IsNullOrWhiteSpace(request.Number) ? address.Number : request.Number!;
-                address.UpdateNumberAndComplement(number, request.Complement);
-            }
-
-            // Se vier CEP novo, reconsulta ViaCEP e atualiza logradouro/bairro/cidade/UF
-            if (!string.IsNullOrWhiteSpace(request.Cep))
-            {
-                var newCep = Cep.From(request.Cep);
-
-                if (newCep.Value != address.Cep.Value)
-                {
-                    var via = await _viaCep.GetAsync(newCep.Value, ct);
-                    if (via is null || via.Error)
-                        throw new InvalidOperationException("CEP não encontrado no ViaCEP.");
-
-                    address.UpdateCepAndFromViaCep(newCep, via.Street, via.Neighborhood, via.City, via.State);
-                }
-            }
-
-            await _repo.UpdateAsync(address, ct);
-            return AddressMapper.ToResponse(address);
-        }
+        await _repo.UpdateAsync(address, ct);
+        return AddressMapper.ToResponse(address);
     }
 }

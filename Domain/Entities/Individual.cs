@@ -1,16 +1,14 @@
 using Domain.ValueObjects;
 
 namespace Domain.Entities;
-
 public sealed class Individual : Person
 {
     public string Name { get; private set; } = string.Empty;
     public Cpf Cpf { get; private set; } = default;
-
-    // For EF Core
     private Individual() { }
 
-    public Individual(string name, Cpf cpf, Guid addressId) : base(addressId)
+    public Individual(string name, Cpf cpf, Guid addressId, string addressNumber, string? addressComplement)
+        : base(addressId, addressNumber, addressComplement)
     {
         Name = name?.Trim() ?? throw new ArgumentNullException(nameof(name));
         Cpf = cpf;
@@ -37,5 +35,8 @@ public sealed class Individual : Person
 
         if (string.IsNullOrWhiteSpace(Cpf.Value))
             throw new ArgumentException("Cpf é obrigatório.", nameof(Cpf));
+
+        if (string.IsNullOrWhiteSpace(AddressNumber))
+            throw new ArgumentException("Número do endereço é obrigatório.", nameof(AddressNumber));
     }
 }

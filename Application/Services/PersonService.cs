@@ -1,4 +1,4 @@
-using Application.Dtos.Persons.Request;
+Ôªøusing Application.Dtos.Persons.Request;
 using Application.Dtos.Persons.Response;
 using Application.Dtos.Persons;
 using Application.Dtos.Addresses.Request;
@@ -27,28 +27,57 @@ public sealed class PersonService : IPersonService
 
     public async Task<PersonResponse> CreateAsync(CreatePersonRequest request, CancellationToken ct)
     {
-        if (request is null) throw new ArgumentException("Payload È obrigatÛrio.");
+        if (request is null) throw new ArgumentException("Payload √© obrigat√≥rio.");
 
         var addressId = await ResolveOrCreateAddress(request.AddressId, request.Address, ct);
 
+        // ‚úÖ n√∫mero mora na Person
+        if (string.IsNullOrWhiteSpace(request.AddressNumber))
+            throw new ArgumentException("N√∫mero do endere√ßo √© obrigat√≥rio.");
+
+        var addressNumber = request.AddressNumber.Trim();
+        var addressComplement = string.IsNullOrWhiteSpace(request.AddressComplement)
+            ? null
+            : request.AddressComplement.Trim();
+
         if (request.Type == PersonType.Individual)
         {
-            if (string.IsNullOrWhiteSpace(request.Name)) throw new ArgumentException("Nome È obrigatÛrio para PF.");
-            if (string.IsNullOrWhiteSpace(request.Cpf)) throw new ArgumentException("CPF È obrigatÛrio para PF.");
+            if (string.IsNullOrWhiteSpace(request.Name))
+                throw new ArgumentException("Nome √© obrigat√≥rio para PF.");
+            if (string.IsNullOrWhiteSpace(request.Cpf))
+                throw new ArgumentException("CPF √© obrigat√≥rio para PF.");
 
             var cpf = Domain.ValueObjects.Cpf.From(request.Cpf!);
-            var individual = new Domain.Entities.Individual(request.Name!, cpf, addressId);
+            
+            var individual = new Domain.Entities.Individual(
+                request.Name!.Trim(),
+                cpf,
+                addressId,
+                addressNumber,
+                addressComplement
+            );
+
             var created = await _individualRepo.CreateAsync(individual, ct);
             var reloaded = await _individualRepo.GetByIdAsync(created.Id, ct) ?? created;
             return PersonMapper.FromIndividual(reloaded);
         }
         else
         {
-            if (string.IsNullOrWhiteSpace(request.LegalName)) throw new ArgumentException("Raz„o social È obrigatÛria para PJ.");
-            if (string.IsNullOrWhiteSpace(request.Cnpj)) throw new ArgumentException("CNPJ È obrigatÛrio para PJ.");
+            if (string.IsNullOrWhiteSpace(request.LegalName))
+                throw new ArgumentException("Raz√£o social √© obrigat√≥ria para PJ.");
+            if (string.IsNullOrWhiteSpace(request.Cnpj))
+                throw new ArgumentException("CNPJ √© obrigat√≥rio para PJ.");
 
             var cnpj = Domain.ValueObjects.Cnpj.From(request.Cnpj!);
-            var company = new Domain.Entities.Company(request.LegalName!, cnpj, addressId);
+            
+            var company = new Domain.Entities.Company(
+                request.LegalName!.Trim(),
+                cnpj,
+                addressId,
+                addressNumber,
+                addressComplement
+            );
+
             var created = await _companyRepo.CreateAsync(company, ct);
             var reloaded = await _companyRepo.GetByIdAsync(created.Id, ct) ?? created;
             return PersonMapper.FromCompany(reloaded);
@@ -68,16 +97,35 @@ public sealed class PersonService : IPersonService
 
     public async Task<PersonResponse?> UpdateAsync(Guid id, UpdatePersonRequest request, CancellationToken ct)
     {
+        if (request is null) throw new ArgumentException("Payload √© obrigat√≥rio.");
+
         var individual = await _individualRepo.GetByIdAsync(id, ct);
         if (individual is not null)
         {
-            if (!string.IsNullOrWhiteSpace(request.Name)) individual.Rename(request.Name!);
-            if (!string.IsNullOrWhiteSpace(request.Cpf)) individual.UpdateCpf(Domain.ValueObjects.Cpf.From(request.Cpf!));
+            if (!string.IsNullOrWhiteSpace(request.Name))
+                individual.Rename(request.Name!.Trim());
 
+            if (!string.IsNullOrWhiteSpace(request.Cpf))
+                individual.UpdateCpf(Domain.ValueObjects.Cpf.From(request.Cpf!.Trim()));
+
+            // Atualiza AddressId (e garante que o Address exista) quando vier AddressId ou Address(CEP)
             if (request.AddressId.HasValue || request.Address is not null)
             {
                 var newAddressId = await ResolveOrCreateAddress(request.AddressId, request.Address, ct);
                 individual.UpdateAddress(newAddressId);
+            }
+
+            if (!string.IsNullOrWhiteSpace(request.AddressNumber) || request.AddressComplement is not null)
+            {
+                var numberToUse = !string.IsNullOrWhiteSpace(request.AddressNumber)
+                    ? request.AddressNumber!.Trim()
+                    : individual.AddressNumber;
+
+                var complementToUse = request.AddressComplement is null
+                    ? individual.AddressComplement
+                    : (string.IsNullOrWhiteSpace(request.AddressComplement) ? null : request.AddressComplement.Trim()); // permite limpar
+
+                individual.SetAddressDetails(numberToUse, complementToUse);
             }
 
             await _individualRepo.UpdateAsync(individual, ct);
@@ -88,13 +136,31 @@ public sealed class PersonService : IPersonService
         var company = await _companyRepo.GetByIdAsync(id, ct);
         if (company is not null)
         {
-            if (!string.IsNullOrWhiteSpace(request.LegalName)) company.Rename(request.LegalName!);
-            if (!string.IsNullOrWhiteSpace(request.Cnpj)) company.UpdateCnpj(Domain.ValueObjects.Cnpj.From(request.Cnpj!));
+            if (!string.IsNullOrWhiteSpace(request.LegalName))
+                company.Rename(request.LegalName!.Trim());
 
+            if (!string.IsNullOrWhiteSpace(request.Cnpj))
+                company.UpdateCnpj(Domain.ValueObjects.Cnpj.From(request.Cnpj!.Trim()));
+
+            // Atualiza AddressId (e garante que o Address exista) quando vier AddressId ou Address(CEP)
             if (request.AddressId.HasValue || request.Address is not null)
             {
                 var newAddressId = await ResolveOrCreateAddress(request.AddressId, request.Address, ct);
                 company.UpdateAddress(newAddressId);
+            }
+
+            //Atualiza n√∫mero/complemento (moram na Person)
+            if (!string.IsNullOrWhiteSpace(request.AddressNumber) || request.AddressComplement is not null)
+            {
+                var numberToUse = !string.IsNullOrWhiteSpace(request.AddressNumber)
+                    ? request.AddressNumber!.Trim()
+                    : company.AddressNumber;
+
+                var complementToUse = request.AddressComplement is null
+                    ? company.AddressComplement
+                    : (string.IsNullOrWhiteSpace(request.AddressComplement) ? null : request.AddressComplement.Trim());
+
+                company.SetAddressDetails(numberToUse, complementToUse);
             }
 
             await _companyRepo.UpdateAsync(company, ct);
@@ -114,12 +180,14 @@ public sealed class PersonService : IPersonService
         return deletedCompany;
     }
 
-    // resolve AddressId: usa o fornecido; sen„o procura por CEP no DB; se n„o encontrar chama AddressService (ViaCEP)
+    // resolve AddressId: usa o fornecido; sen√£o procura por CEP no DB; se n√£o encontrar cria via AddressService (ViaCEP)
     private async Task<Guid> ResolveOrCreateAddress(Guid? addressId, CreateAddressRequest? addr, CancellationToken ct)
     {
-        if (addressId.HasValue && addressId.Value != Guid.Empty) return addressId.Value;
+        if (addressId.HasValue && addressId.Value != Guid.Empty)
+            return addressId.Value;
 
-        if (addr is null) throw new ArgumentException("InformaÁıes de endereÁo s„o obrigatÛrias quando AddressId n„o È fornecido.");
+        if (addr is null)
+            throw new ArgumentException("Informe AddressId ou Address com CEP.");
 
         var cepValue = Domain.ValueObjects.Cep.From(addr.Cep).Value;
 
@@ -128,22 +196,21 @@ public sealed class PersonService : IPersonService
 
         var created = await _addressService.CreateAsync(new CreateAddressRequest
         {
-            Cep = addr.Cep,
-            Number = addr.Number,
-            Complement = addr.Complement
+            Cep = addr.Cep
         }, ct);
 
         return created.Id;
     }
+
     public async Task<PersonResponse?> GetByDocumentAsync(string number, PersonType type, CancellationToken ct)
     {
         var digits = new string(number.Where(char.IsDigit).ToArray());
         if (string.IsNullOrWhiteSpace(digits))
-            throw new ArgumentException("N˙mero do documento inv·lido.");
+            throw new ArgumentException("N√∫mero do documento inv√°lido.");
 
         if (type == PersonType.Individual)
         {
-            var cpf = Domain.ValueObjects.Cpf.From(digits); // valida e normaliza
+            var cpf = Domain.ValueObjects.Cpf.From(digits);
             var individual = await _individualRepo.GetByCpfAsync(cpf.Value, ct);
             return individual is null ? null : PersonMapper.FromIndividual(individual);
         }
@@ -155,6 +222,6 @@ public sealed class PersonService : IPersonService
             return company is null ? null : PersonMapper.FromCompany(company);
         }
 
-        throw new ArgumentException("Tipo de pessoa inv·lido.");
+        throw new ArgumentException("Tipo de pessoa inv√°lido.");
     }
 }

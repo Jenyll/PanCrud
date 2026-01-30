@@ -5,30 +5,26 @@ namespace Domain.Entities;
 public sealed class Company : Person
 {
     public string LegalName { get; private set; } = string.Empty;
-
     public Cnpj Cnpj { get; private set; }
-
-    // Para EF Core
     private Company() { }
-
-    public Company(string legalName, Cnpj cnpj, Guid addressId) : base(addressId)
+    public Company(string legalName, Cnpj cnpj, Guid addressId, string addressNumber, string? addressComplement)
+        : base(addressId, addressNumber, addressComplement)
     {
-        LegalName = legalName?.Trim() ?? throw new ArgumentNullException(nameof(legalName), "Razão social é obrigatória.");
-        Cnpj = cnpj;
+        LegalName = legalName?.Trim()
+            ?? throw new ArgumentNullException(nameof(legalName), "Razão social é obrigatória.");
 
+        Cnpj = cnpj;
         Validate();
     }
 
     public void Rename(string legalName)
     {
-        LegalName = legalName?.Trim() ?? throw new ArgumentNullException(nameof(legalName), "Razão social é obrigatória.");
+        LegalName = legalName?.Trim()
+            ?? throw new ArgumentNullException(nameof(legalName), "Razão social é obrigatória.");
         Validate();
     }
 
-    public void UpdateCnpj(Cnpj cnpj)
-    {
-        Cnpj = cnpj;
-    }
+    public void UpdateCnpj(Cnpj cnpj) => Cnpj = cnpj;
 
     private void Validate()
     {

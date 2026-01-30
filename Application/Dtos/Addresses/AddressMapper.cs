@@ -10,8 +10,6 @@ namespace Application.Dtos.Addresses
             Id = address.Id,
             Cep = address.Cep.Value,
             Street = address.Street,
-            Number = address.Number,
-            Complement = address.Complement,
             Neighborhood = address.Neighborhood,
             City = address.City,
             State = address.State

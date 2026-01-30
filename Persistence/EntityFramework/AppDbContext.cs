@@ -41,11 +41,12 @@ namespace Persistence.EntityFramework
                     .IsRequired();
 
                 e.Property(x => x.Street).HasMaxLength(200).IsRequired();
-                e.Property(x => x.Number).HasMaxLength(50).IsRequired();
-                e.Property(x => x.Complement).HasMaxLength(200);
                 e.Property(x => x.Neighborhood).HasMaxLength(120).IsRequired();
                 e.Property(x => x.City).HasMaxLength(120).IsRequired();
                 e.Property(x => x.State).HasMaxLength(2).IsRequired();
+
+                //1 endereço base por CEP
+                e.HasIndex(x => x.Cep).IsUnique();
             });
 
             modelBuilder.Entity<Individual>(e =>
@@ -60,7 +61,19 @@ namespace Persistence.EntityFramework
                     .HasMaxLength(11)
                     .IsRequired();
 
+                e.HasIndex(x => x.Cpf).IsUnique();
+
                 e.Property(x => x.AddressId).IsRequired();
+
+                //número/complemento moram na Person (base)
+                e.Property(x => x.AddressNumber).HasMaxLength(50).IsRequired();
+                e.Property(x => x.AddressComplement).HasMaxLength(200);
+
+                //FK com Address (sem cascata pra não apagar endereço base)
+                e.HasOne(x => x.Address)
+                 .WithMany()
+                 .HasForeignKey(x => x.AddressId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Company>(e =>
@@ -75,7 +88,18 @@ namespace Persistence.EntityFramework
                     .HasMaxLength(14)
                     .IsRequired();
 
+                e.HasIndex(x => x.Cnpj).IsUnique();
+
                 e.Property(x => x.AddressId).IsRequired();
+
+                //número/complemento moram na Person (base)
+                e.Property(x => x.AddressNumber).HasMaxLength(50).IsRequired();
+                e.Property(x => x.AddressComplement).HasMaxLength(200);
+
+                e.HasOne(x => x.Address)
+                 .WithMany()
+                 .HasForeignKey(x => x.AddressId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             base.OnModelCreating(modelBuilder);

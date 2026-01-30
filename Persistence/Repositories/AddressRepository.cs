@@ -41,10 +41,10 @@ namespace Persistence.Repositories
         public Task<Address?> GetByCepAsync(string cep, CancellationToken ct)
         {
             if (string.IsNullOrWhiteSpace(cep)) return Task.FromResult<Address?>(null);
-            var normalized = new string(cep.Where(char.IsDigit).ToArray());
-            return _db.Addresses.FirstOrDefaultAsync(
-                x => EF.Property<string>(x, nameof(Address.Cep)) == normalized,
-                ct);
+
+            var normalized = Domain.ValueObjects.Cep.From(cep).Value;
+
+            return _db.Addresses.FirstOrDefaultAsync(x => x.Cep.Value == normalized, ct);
         }
     }
 }

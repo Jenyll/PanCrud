@@ -27,9 +27,13 @@ namespace Application.UseCases.Addresses.Implement
 
             var cep = Cep.From(request.Cep);
 
+            var existing = await _repo.GetByCepAsync(cep.Value, ct);
+            if (existing is not null)
+                return AddressMapper.ToResponse(existing);
+
             var via = await _viaCep.GetAsync(cep.Value, ct);
             if (via is null || via.Error)
-                throw new InvalidOperationException("CEP não encontrado no ViaCEP.");
+                throw new InvalidOperationException("CEP Invalido.");
 
             var address = new Address(
                 cep: cep,
@@ -42,6 +46,5 @@ namespace Application.UseCases.Addresses.Implement
             var created = await _repo.CreateAsync(address, ct);
             return AddressMapper.ToResponse(created);
         }
-
     }
 }

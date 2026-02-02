@@ -42,9 +42,9 @@ namespace Persistence.Repositories
         {
             if (string.IsNullOrWhiteSpace(cep)) return Task.FromResult<Address?>(null);
 
-            var normalized = Domain.ValueObjects.Cep.From(cep).Value;
+            var normalized = Domain.ValueObjects.Cep.From(cep);
 
-            return _db.Addresses.FirstOrDefaultAsync(x => x.Cep.Value == normalized, ct);
+            return _db.Addresses.FirstOrDefaultAsync(x => x.Cep == normalized, ct);
         }
     }
 }

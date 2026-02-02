@@ -35,7 +35,7 @@ namespace Api.Controllers
             var result = await _service.LookupByCepAsync(cep, ct);
 
             if (result is null)
-                return NotFound(new { message = "CEP não encontrado." });
+                return NotFound(new { message = "CEP não cadastrado." });
 
             return Ok(result);
         }
@@ -45,6 +45,9 @@ namespace Api.Controllers
         {
             try
             {
+                var existing = await _service.LookupByCepAsync(request.Cep, ct);
+                if (existing is not null) return Ok(existing);
+
                 var created = await _service.CreateAsync(request, ct);
                 return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
             }

@@ -40,38 +40,7 @@ public sealed class AddressService : IAddressService
 
     public Task<bool> DeleteAsync(Guid id, CancellationToken ct)
         => _delete.ExecuteAsync(id, ct);
-
-    public async Task<bool> IsCepRegisteredAsync(string cep, CancellationToken ct)
-    {
-        var value = Cep.From(cep).Value;
-        var existing = await _repo.GetByCepAsync(value, ct);
-        return existing is not null;
-    }
-    public Task<Address?> GetAddressByCepAsync(string cep, CancellationToken ct)
-    {
-        var value = Cep.From(cep).Value;
-        return _repo.GetByCepAsync(value, ct);
-    }
-    public async Task<Address> EnsureAddressExistsAsync(CreateAddressRequest request, CancellationToken ct)
-    {
-        var cepValue = Cep.From(request.Cep).Value;
-
-        var existing = await _repo.GetByCepAsync(cepValue, ct);
-        if (existing is not null) return existing;
-
-        var createdDto = await _create.ExecuteAsync(request, ct);
-        var createdEntity = await _repo.GetByIdAsync(createdDto.Id, ct);
-        if (createdEntity is null)
-            throw new InvalidOperationException("Endereço criado mas não encontrado no repositório.");
-
-        return createdEntity;
-    }
-    public async Task<AddressResponse?> GetByCepAsync(string cep, CancellationToken ct)
-    {
-        var value = Cep.From(cep).Value;
-        var entity = await _repo.GetByCepAsync(value, ct);
-        return entity is null ? null : AddressMapper.ToResponse(entity);
-    }
+    
     public async Task<AddressLookupResponse?> LookupByCepAsync(string cep, CancellationToken ct)
     {
         var value = Cep.From(cep).Value;

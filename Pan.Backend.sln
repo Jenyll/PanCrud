@@ -28,6 +28,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Persistence", "Persistence\
 		{F9D98542-4C47-4F85-86CC-CA24F66559B2} = {F9D98542-4C47-4F85-86CC-CA24F66559B2}
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Pan.Backend.Tests", "Pan.Backend.Tests\Pan.Backend.Tests.csproj", "{D264C789-907A-4189-88CE-E707A950F4D2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -54,6 +56,10 @@ Global
 		{B05A340B-AD0D-447B-9289-EA5C52E00ED3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B05A340B-AD0D-447B-9289-EA5C52E00ED3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B05A340B-AD0D-447B-9289-EA5C52E00ED3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D264C789-907A-4189-88CE-E707A950F4D2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D264C789-907A-4189-88CE-E707A950F4D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D264C789-907A-4189-88CE-E707A950F4D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D264C789-907A-4189-88CE-E707A950F4D2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

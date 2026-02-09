@@ -12,6 +12,9 @@ public readonly record struct Cep(string Value)
         if (digits.Length != 8)
             throw new ArgumentException("CEP must have 8 digits.", nameof(input));
 
+        if (digits.All(c => c == digits[0]))
+            throw new ArgumentException("CEP inválido.", nameof(input));
+
         return new Cep(digits);
     }
 

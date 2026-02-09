@@ -57,7 +57,6 @@ namespace Api.Controllers
             }
             catch (InvalidOperationException ex)
             {
-                // Ex: CEP inválido no provedor, CEP não encontrado, etc.
                 return UnprocessableEntity(new { message = ex.Message });
             }
         }

@@ -29,15 +29,24 @@ namespace Api.Controllers
         [HttpGet("cep/{cep}")]
         public async Task<ActionResult<AddressLookupResponse>> GetByCep([FromRoute] string cep, CancellationToken ct)
         {
-            if (string.IsNullOrWhiteSpace(cep))
-                return BadRequest(new { message = "CEP é obrigatório." });
+            try
+            {
+                if (string.IsNullOrWhiteSpace(cep))
+                    return BadRequest(new { message = "CEP é obrigatório." });
 
-            var result = await _service.LookupByCepAsync(cep, ct);
+                var result = await _service.LookupByCepAsync(cep, ct);
 
-            if (result is null)
-                return NotFound(new { message = "CEP não cadastrado." });
+                if (result is null)
+                    return NotFound(new { message = "CEP não cadastrado." });
 
-            return Ok(result);
+                return Ok(result);
+            }
+            catch (ArgumentException ex)
+            {
+
+                return BadRequest(new { message = ex.Message });
+            }
+            
         }
 
         [HttpPost]
@@ -45,11 +54,8 @@ namespace Api.Controllers
         {
             try
             {
-                var existing = await _service.LookupByCepAsync(request.Cep, ct);
-                if (existing is not null) return Ok(existing);
-
-                var created = await _service.CreateAsync(request, ct);
-                return CreatedAtAction(nameof(GetById), new { id = created.Id }, created);
+                var result = await _service.CreateAsync(request, ct);
+                return Ok(result);
             }
             catch (ArgumentException ex)
             {

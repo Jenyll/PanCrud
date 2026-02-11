@@ -33,7 +33,7 @@ namespace Application.UseCases.Addresses.Implement
 
             var via = await _viaCep.GetAsync(cep.Value, ct);
             if (via is null || via.Error)
-                throw new InvalidOperationException("CEP Invalido.");
+                throw new InvalidOperationException("CEP não encontrado no ViaCEP.");
 
             var address = new Address(
                 cep: cep,

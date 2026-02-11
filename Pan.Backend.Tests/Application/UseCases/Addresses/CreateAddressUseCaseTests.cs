@@ -148,7 +148,7 @@ namespace Pan.Backend.Tests.Application.UseCases.Addresses
 
             var request = new CreateAddressRequest
             {
-                Cep = "00000000" // inválido pelo VO
+                Cep = "00000000"
             };
 
             await Assert.ThrowsAsync<ArgumentException>(() =>

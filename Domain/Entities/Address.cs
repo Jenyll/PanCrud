@@ -5,27 +5,26 @@ namespace Domain.Entities;
 public class Address
 {
     public Guid Id { get; private set; } = Guid.NewGuid();
-    public Cep Cep { get; private set; }    
+
+    public Cep Cep { get; private set; }
+
+    // Dados do ViaCEP
     public string Street { get; private set; } = string.Empty;
     public string Neighborhood { get; private set; } = string.Empty;
     public string City { get; private set; } = string.Empty;
     public string State { get; private set; } = string.Empty;
 
-    // Dados "do usuário" (somente no cadastro da Person)
-    public string? Number { get; private set; } 
+    // Dados informados pelo usuário (não vêm do ViaCEP)
+    public string? Number { get; private set; }
     public string? Complement { get; private set; }
 
+    // For EF Core
     private Address() { }
 
     /// <summary>
     /// Endereço base (lookup por CEP): não exige número.
     /// </summary>
-    public Address(
-        Cep cep,
-        string street,
-        string neighborhood,
-        string city,
-        string state)
+    public Address(Cep cep, string street, string neighborhood, string city, string state)
     {
         Cep = cep;
 
@@ -51,7 +50,7 @@ public class Address
     }
 
     /// <summary>
-    /// Atualiza CEP + dados ViaCEP (se você precisar "trocar" o CEP do endereço).
+    /// Atualiza CEP + dados ViaCEP.
     /// </summary>
     public void UpdateCepAndFromViaCep(Cep cep, string street, string neighborhood, string city, string state)
     {
@@ -60,8 +59,26 @@ public class Address
     }
 
     /// <summary>
-    /// Preenche os dados que o usuário informa (no cadastro da Person).
-    /// </summary>   
+    /// Preenche/atualiza os dados informados pelo usuário.
+    /// Regra: Number obrigatório se você quiser “endereço completo”.
+    /// </summary>
+    public void SetUserDetails(string number, string? complement)
+    {
+        if (string.IsNullOrWhiteSpace(number))
+            throw new ArgumentException("Número é obrigatório.", nameof(number));
+
+        Number = number.Trim();
+        Complement = string.IsNullOrWhiteSpace(complement) ? null : complement.Trim();
+    }
+
+    /// <summary>
+    /// Permite limpar os dados do usuário (se fizer sentido no seu CRUD).
+    /// </summary>
+    public void ClearUserDetails()
+    {
+        Number = null;
+        Complement = null;
+    }
 
     private static string NormalizeRequired(string value, string paramName)
         => string.IsNullOrWhiteSpace(value)

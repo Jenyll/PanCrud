@@ -14,7 +14,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// EF Core (SQLite para desenvolvimento rápido)
 builder.Services.AddDbContext<AppDbContext>(opt =>
     opt.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -32,13 +31,10 @@ builder.Services.AddScoped<ICreateAddress, CreateAddress>();
 builder.Services.AddScoped<IGetAddress, GetAddress>();
 builder.Services.AddScoped<IUpdateAddress, UpdateAddress>();
 builder.Services.AddScoped<IDeleteAddress, DeleteAddress>();
-
-// Facade usada pela Controller
 builder.Services.AddScoped<IAddressService, AddressService>();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

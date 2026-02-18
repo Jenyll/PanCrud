@@ -1,0 +1,57 @@
+using Application.Dtos.Addresses.Request;
+using Application.Dtos.Addresses.Response;
+using Application.Ports;
+using Application.UseCases.Addresses.Interfaces;
+using Domain.ValueObjects;
+
+namespace Application.Services;
+
+public sealed class AddressService : IAddressService
+{
+    private readonly ICreateAddress _create;
+    private readonly IGetAddress _get;
+    private readonly IUpdateAddress _update;
+    private readonly IDeleteAddress _delete;
+    private readonly IAddressRepository _repo;
+
+    public AddressService(
+        ICreateAddress create,
+        IGetAddress get,
+        IUpdateAddress update,
+        IDeleteAddress delete,
+        IAddressRepository repo)
+    {
+        _create = create;
+        _get = get;
+        _update = update;
+        _delete = delete;
+        _repo = repo;
+    }
+    public Task<AddressResponse> CreateAsync(CreateAddressRequest request, CancellationToken ct)
+        => _create.ExecuteAsync(request, ct);
+
+    public Task<AddressResponse?> GetByIdAsync(Guid id, CancellationToken ct)
+        => _get.ExecuteAsync(id, ct);
+
+    public Task<AddressResponse?> UpdateAsync(Guid id, UpdateAddressRequest request, CancellationToken ct)
+        => _update.ExecuteAsync(id, request, ct);
+
+    public Task<bool> DeleteAsync(Guid id, CancellationToken ct)
+        => _delete.ExecuteAsync(id, ct);
+    
+    public async Task<AddressLookupResponse?> LookupByCepAsync(string cep, CancellationToken ct)
+    {
+        var value = Cep.From(cep).Value;
+        var entity = await _repo.GetByCepAsync(value, ct);
+        if (entity is null) return null;
+
+        return new AddressLookupResponse
+        {
+            Cep = new string(cep.Where(char.IsDigit).ToArray()),
+            Street = entity.Street,
+            Neighborhood = entity.Neighborhood,
+            City = entity.City,
+            State = entity.State
+        };
+    }
+}

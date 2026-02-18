@@ -416,3 +416,16 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# Angular
+.angular/
+dist/
+**/dist/
+**/.angular/
+
+# Vite/Vitest cache (se aparecer)
+.vite/
+coverage/
+
+# OS
+.DS_Store
